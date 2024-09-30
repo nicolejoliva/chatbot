@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        #chat-container {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: white;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+        }
+        #user-input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #send-button {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-container"></div>
+<input type="text" id="user-input" placeholder="Type your message here..." />
+<button id="send-button">Send</button>
+
+<script>
+    const chatContainer = document.getElementById('chat-container');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+
+    const apiKey = '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'; // Replace with your OpenRouter API key
+
+    sendButton.onclick = () => {
+        const userMessage = userInput.value;
+        if (userMessage) {
+            chatContainer.innerHTML += `<div>User: ${userMessage}</div>`;
+            userInput.value = '';
+
+            // Call OpenRouter API
+            fetch('https://api.openrouter.ai/v1/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'meta-llama/llama-3.2-11b-vision-instruct', // Specify the model
+                    prompt: userMessage,
+                    max_tokens: 100 // Adjust as needed
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botResponse = data.choices[0].text;
+                chatContainer.innerHTML += `<div>Bot: ${botResponse}</div>`;
+                chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+            })
+            .catch(error => {
+                chatContainer.innerHTML += `<div>Bot: Sorry, there was an error processing your request.</div>`;
+                console.error('Error:', error);
+            });
+        }
+    };
+</script>
+
+</body>
+</html>
